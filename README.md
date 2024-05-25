@@ -6,7 +6,7 @@ The [Neuralink Compression Challenge](https://content.neuralink.com/compression-
 
 To transmit this data wirelessly in real-time, a _<ins>compression ratio greater than 200x</ins>_ is necessary, all while operating under stringent conditions of _<ins>less than 1 ms latency</ins>_ and <ins>_power consumption below 10 mW_</ins>.
 
-**The goal was to deterministically get a sense of how well-established lossless compression techniques could effectively compress this unique type of data.**
+**The goal of this project was to deterministically get a sense of how well-established lossless compression techniques could effectively compress this unique type of data.**
 
 
 > [!IMPORTANT]
@@ -22,9 +22,10 @@ To transmit this data wirelessly in real-time, a _<ins>compression ratio greater
 >
 > **Despite the common application of these algorithms in various data types, little work has been done to investigate how these compression techniques perform specifically on electrophysiology data.**
 
+### Holistic Overview of Algorithms Deployed:
+_24+ lossless compression algorithms were tested & benchmarked against each other._
 
-[INSERT OVERVIEW OF ALL COMPRESSION ALGOS HERE WITH 2-3 POINTS]
-
+![Compression_Ratios_Scatter_Plot](https://github.com/mikaelhaji/n1-codec/assets/68840767/ee2df863-3fb9-4741-bdc0-3504a4cfc202)
 
 ## Table of Contents
 - [Build Instructions](#build-instructions)
