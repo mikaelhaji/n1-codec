@@ -40,28 +40,96 @@ _24+ lossless compression algorithms were tested & benchmarked against each othe
 
 ## Build Instructions
 ### Repository Structure
-A detailed explanation of how the repository is organized, including directories and their contents, which will help users navigate and utilize the various scripts and data files effectively.
+- **Files:**
+  - `encode.py`: Script for encoding the N1 wav files using the compression algorithm you pick.
+  - `decode.py`: Script for decoding the compressed audio files to validate lossless compression.
+  - `eval.sh`: Bash script to automate the compression and decompression process, and to calculate compression ratios.
+  - `grid_search.sh`: Bash script to sweep through all the compression algorithms of your choice and record data to the `~/tests/compression_results.csv` file
+  - `Makefile`:Used to build and manage symbolic links for Python encode/decode scripts, and to run evaluation scripts.
+- **Directories:**
+  - `~/algorithms:` Holds all the algorithm logic. If you wanted to add your own algorithm, you could add it in this directory and call it from `encode.py`.
+  - `~/data:` Holds all the data (743 wav files).
+  -  `~/tests:` CSV & Notebooks for unit testing.
 
 ### How to Run
 #### Setup Instructions
-Comprehensive step-by-step instructions on how to set up the necessary environment, install dependencies, and prepare the data for running the compression algorithms.
 
-#### Execution Commands
-Clear and concise commands for running the compression scripts, including examples of command-line arguments and expected outputs to ensure reproducibility of results.
+**To install all dependencies, simply run:**
+```
+make install
+```
 
+> [!NOTE]
+>
+> **For WavPack, simply run:** <br>
+> 1) Install the WavPack Library <br>
+>   a) `brew install wavpack` (Mac) <br>
+>   b) `sudo apt-get install wavpack` (Debian Based Systems)
+> 2) Go to Home directory in repo & `cd /n1-codec/misc/wavpack-numcodecs`
+> 3) Install directory: `pip install .`
 
-
---------
-
-
-### Setup Instructions
 
 ### Execution Commands
-Clear and concise commands for running the compression scripts, including examples of command-line arguments and expected outputs to ensure reproducibility of results.
+
+#### To Evaluate a Single Algorithm's Compression:
+1. Ensure that `mode = insert algo mode here` for both `encode.py` and `decode.py`
+2. Run `make encode` to make the `encode` executable
+3. Run `make decode` to make the `decode` executable
+4. Run the `eval.sh` bash script by running `make eval`
+
+#### To Evaluate a Series of Algorithm's Compression:
+1. Ensure that `mode = sys.argv[3]` for both `encode.py` and `decode.py`
+2. Run `make encode` to make the `encode` executable
+3. Run `make decode` to make the `decode` executable
+4. Run the `grid_results.sh` bash script by running `make grid`
 
 ## Data Analysis
-### Preprocessing Insights
-Discussion of the preprocessing steps required for the data before applying the compression algorithms, including any data normalization or filtering techniques applied.
+The fundamental characteristics of this dataset are as follows:
+- **High Throughput**: The N1 implant generates approximately 200 Mbps of data, stemming from 1024 electrodes.
+- **High Sampling Rate**: Each electrode samples neural signals at 20 kHz.
+- **Resolution**: The data from each electrode is quantized at 10-bit resolution.
+
+This dataset presents substantial challenges due to its size and complexity, necessitating sophisticated compression strategies to reduce bandwidth effectively while preserving the integrity and quality of the neural signals.
+
+### Desired Compression Ratio of 200x ....
+The Neuralink Compression Challenge set a formidable goal of achieving a **200x lossless compression ratio**. This target, while theoretically appealing, presents substantial practical challenges given the **inherent noise and complexity of electrophysiological data**.
+
+In an article a friend and I [wrote last year reviewing all of Neuralink's patents and papers](https://mikaelhaji.medium.com/a-technical-deep-dive-on-elon-musks-neuralink-in-40-mins-71e1100f54d4), we delved deep into what Neuralink had deployed in order to get the most important features from their data.
+
+**Here's a long but insightful excerpt on the compression tactics (w. loss) that Neuralink has deployed:**
+
+> Compression strategies predominantly involve applying thresholds to detect spikes in a specific **range, summary statistics like channel-wise averages, and/or event-based triggers off-chip**. Alternatively, information-theoretic lossless compression techniques **like PNG, TIFF, or ZIP** may be used. In some examples, the reduction in bandwidth from the compression engine can **exceed 1,000 times fewer data**. <br>
+>
+> These thresholds may be set on the voltage of the signal or the frequency of the signal. Low-frequency and high-frequency signals may not be valuable to the recorder and can be filtered out by the compression engine. Non-spike signals are discarded, essentially reducing the size of the data packets, and compressing the signal. For voltage-based thresholds, a technique called non-linear energy operator (NEO) may be used to automatically find a threshold that accurately detects spikes.
+
+<p align="center">
+  <img src="https://github.com/mikaelhaji/n1-codec/assets/68840767/dae26106-b609-4ee1-ae55-d7a52f5c6b9f">
+</p>
+
+> Briefly reviewing NEO, it essentially filters the signals for the periods at which there are fast frequency and amplitude changes of spikes, which can be seen as short peaks in the NEO filtered output. <br>
+>
+$$
+\psi[x(n)] = |x(n) \cdot x(n)| - |x(n-1) \cdot x(n+1)|
+$$
+
+>
+> NEO, represented by **𝝍[x(n)]**, of a signal **x(n)** can be computed as shown above. It simply compares the deviation between the signal at **n** time step and the signal at **n-1** and **n+1** time steps.
+
+$$
+\text{Thr} = C \times \frac{1}{N} \sum_{n=1}^{N} \psi[x(n)]
+$$
+
+> Furthermore, a threshold for NEO detection can be calculated as the mean of the NEO filtered output multiplied by a **factor C**. In this equation, **N** is the number of samples of the signal. **C **is found empirically and should be tested on several neural datasets beforehand to achieve the best results. <br>
+>
+> Both the compression engine and controller play a crucial role in throttling the amount of data being generated by each chip. Throttling allows for power and performance efficiency improvements for the N1 system. <br>
+>
+> Alternatively, during the Neuralink launch event, DJ Seo introduced a novel on-chip spike detection algorithm that involved directly characterizing the shape of a spike. This method is able to **compress neural data by more than 200x and only takes 900 nanoseconds to compute**, which is faster than the time it takes for the brain to realize it happened. This technique even allows for identifying different neurons from the same electrode based on shape.
+
+
+
+
+
+
 
 ### Key Metrics Overview
 Presentation of the key metrics used to evaluate compression performance, such as compression ratio, decompression speed, entropy changes, and any error metrics that were tracked.
@@ -107,20 +175,7 @@ An invitation for collaboration, encouraging contributions, feedback, and sugges
 
 
 
-# n1-codec
-A highly efficient compression algorithm for the N1 implant. (neuralink's compression challenge)
 
-
-
-## Table of Contents
-- Overview (what the hell is the challenge in broad strokes, insert a picture of the data pre and post compression to demonstrate complete losslessness, the 6 buckets of compression algos deployed) & results
-- Repository Structure
-- How to Run
-- Data Analysis
-- Algorithms Deployed
-  - bucket x
-    - analysis
-- Next Steps
 
  Lossless compression reduces the size of a file without removing any information, meaning the
 original data will be perfectly intact following decompression. The final size of the compressed file depends
