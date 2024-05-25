@@ -28,21 +28,32 @@ To transmit this data wirelessly in real-time, a _<ins>compression ratio greater
 
 ## Table of Contents
 - [Build Instructions](#build-instructions)
+  - [Repository Structure](#repository-structure)
+  - [How to Run](#how-to-run)
+    - [Setup Instructions](#setup-instructions)
+    - [Execution Commands](#execution-commands)
 - [How to Run](#how-to-run)
 - [Data Analysis](#data-analysis)
 - [Algorithms Deployed](#algorithms-deployed)
 - [Next Steps](#next-steps)
 
 ## Build Instructions
-### Code Organization
+### Repository Structure
 A detailed explanation of how the repository is organized, including directories and their contents, which will help users navigate and utilize the various scripts and data files effectively.
 
-### Data and Resources
-Detailed descriptions of datasets, preprocessing steps, models, and other resources utilized or generated throughout the project, including download links and usage instructions.
-
-## How to Run
-### Setup Instructions
+### How to Run
+#### Setup Instructions
 Comprehensive step-by-step instructions on how to set up the necessary environment, install dependencies, and prepare the data for running the compression algorithms.
+
+#### Execution Commands
+Clear and concise commands for running the compression scripts, including examples of command-line arguments and expected outputs to ensure reproducibility of results.
+
+
+
+--------
+
+
+### Setup Instructions
 
 ### Execution Commands
 Clear and concise commands for running the compression scripts, including examples of command-line arguments and expected outputs to ensure reproducibility of results.
