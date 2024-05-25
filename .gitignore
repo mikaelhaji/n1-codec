@@ -1,0 +1,4 @@
+*.wav
+data/*
+!data/0ab237b7-fb12-4687-afed-8d1e2070d621.wav
+
