@@ -24,7 +24,7 @@ do
   unzip data.zip
 
 
-  
+
   for file in data/*
   do
     echo "Processing $file"
@@ -68,7 +68,7 @@ do
   average_compression_speed_xRT=$(echo "scale=2; $total_compression_time / $total_duration_seconds" | bc)
   average_decompression_speed_xRT=$(echo "scale=2; $total_decompression_time / 5" | bc) # Assuming all files together represent 5s of audio
 
-  echo "$mode,$total_size_raw,$total_size_compressed,$final_compression_ratio,$average_compression_speed_xRT,$average_decompression_speed_xRT" >> compression_results.csv
+  # echo "$mode,$total_size_raw,$total_size_compressed,$final_compression_ratio,$average_compression_speed_xRT,$average_decompression_speed_xRT" >> compression_results.csv
 
   echo "Total Original size (bytes): $total_size_raw"
   echo "Total Compressed size (bytes): $total_size_compressed"
