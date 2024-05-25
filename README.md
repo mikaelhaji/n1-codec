@@ -27,7 +27,7 @@ To transmit this data wirelessly in real-time, a _<ins>compression ratio greater
 
 
 ## Table of Contents
-- [Build Instructions](build-instructions)
+- [Build Instructions](#build-instructions)
 - [How to Run](#how-to-run)
 - [Data Analysis](#data-analysis)
 - [Algorithms Deployed](#algorithms-deployed)
