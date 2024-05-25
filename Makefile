@@ -28,9 +28,13 @@ decode_cpp: decode.c
 
 
 eval:
+	sudo bash eval.sh	
+
+grid:
 	sudo bash grid_search.sh	
 
 
 clean:
 	rm -f encode decode
+	
 
