@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-rm -rf data
-unzip data.zip
-
 get_file_size() {
   gfind "$1" -printf "%s\n"
 }
@@ -21,6 +18,13 @@ modes=('huff' 'delta_huff' 'zstd' 'delta_zstd' 'blosc_zstd' 'delta_blosc_zstd' '
 for mode in "${modes[@]}"
 do
   echo "Testing mode: $mode"
+
+
+  rm -rf data
+  unzip data.zip
+
+
+  
   for file in data/*
   do
     echo "Processing $file"
@@ -62,9 +66,15 @@ do
 
   final_compression_ratio=$(echo "scale=2; $total_size_raw / $total_size_compressed" | bc)
   average_compression_speed_xRT=$(echo "scale=2; $total_compression_time / $total_duration_seconds" | bc)
-  average_decompression_speed_xRT=$(echo "scale=2; $total_decompression_time / 10" | bc) # Assuming all files together represent 10s of audio
+  average_decompression_speed_xRT=$(echo "scale=2; $total_decompression_time / 5" | bc) # Assuming all files together represent 5s of audio
 
   echo "$mode,$total_size_raw,$total_size_compressed,$final_compression_ratio,$average_compression_speed_xRT,$average_decompression_speed_xRT" >> compression_results.csv
+
+  echo "Total Original size (bytes): $total_size_raw"
+  echo "Total Compressed size (bytes): $total_size_compressed"
+  echo "Final Compression Ratio: $final_compression_ratio"
+  echo "Average Compression Speed (xRT): $average_compression_speed_xRT"
+  echo "Average Decompression Speed (xRT): $average_decompression_speed_xRT"
 
   # Reset totals for the next mode
   total_size_raw=0

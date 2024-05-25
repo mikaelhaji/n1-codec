@@ -138,7 +138,7 @@ def main(input_file, compressed_file, tree_file, mode):
 
 if __name__ == '__main__':
     mode = sys.argv[3]  # Now expecting mode as third argument
-    # mode = "blosc_lz4"
+    # mode = "delta_huff"
     input_file = sys.argv[1]
     compressed_file = sys.argv[2]
     tree_file = sys.argv[2] + "_tree.json"

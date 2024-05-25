@@ -1,3 +1,5 @@
+# LOSSLESS, STALLS, not great for the data
+
 class ArithmeticCodec:
     def __init__(self, num_symbols=256):
         self.num_symbols = num_symbols
