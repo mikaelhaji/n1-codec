@@ -161,6 +161,17 @@ The spectral entropy of the electrophysiology data **averages at 4.88**, indicat
 
 
 ## The Suite of Lossless Algorithms
+
+> [!NOTE]
+>
+> **As a reminder, there were 5 groups that these algorithms were categorized in based on their core methodologies and performance characteristics:**
+>
+> 1. _Dictionary-Based Codecs (zstd, lz4, lz4hc, gzip, zlib, bz2 etc.)_
+> 2. _Predictive Codecs (delta etc.)_
+> 3. _Entropy Codecs (huffman, arithmetic etc.)_
+> 4. _Specialized Audio Codecs (wavpack etc.)_
+> 5. _Blosc Hybrid Codecs_
+
 ### Benchmarking Metrics
 The following variables were measured in order to effectively benchmark the algorithms against one another:
 - **Compression Ratio (CR)**, computed by dividing the number of bytes in the original data file by the number of bytes written to disk after compression. The higher the compression ratio, the lower disk space the compressed data will occupy. For example, a CR of 2 implies that the compressed data occupies half of the disk space (50%) compared to uncompressed data, a CR of 4 occupies 25% of the disk space, and so on.
@@ -168,46 +179,116 @@ The following variables were measured in order to effectively benchmark the algo
 - **Decompression speed** (in xRT), computed by dividing the time needed to decompress the data in a 5s time range by 5.
 
 ### Results
-
 ![Compression_Decompression_Comparison](https://github.com/mikaelhaji/n1-codec/assets/68840767/29ece761-2312-4506-8b9e-cef51597b66d)
 
+**insights/thoughts:**
+- **bz2** achieved the highest compression ratio (3.11x) primarily because it effectively exploits the local redundancy within electrophysiology data. The Burrows-Wheeler Transform rearranges the data into runs of similar characters, which are highly compressible, especially in data with repetitive neural spike patterns.
+- **Delta encoding** showed significant improvements when used as a preprocessing step (e.g., **delta_zstd, delta_huff**). It reduces data variability by encoding differences between consecutive samples, which is effective in neural data where sequential readings often differ by small amounts. This reduction in variance enhances the efficiency of subsequent entropy or dictionary-based compression.
+- **lzma**, despite its computational intensity, provided strong compression (2.75x) due to its use of a very large dictionary size, which is more capable of capturing the longer, complex repeating patterns that simpler algorithms might miss in high-resolution neural data.
+- **WavPack**, designed for audio, did not perform optimally, highlighting that the stochastic and non-periodic nature of neural spikes contrasts significantly with the more predictable and periodic nature of audio waveforms.
+- **Huffman coding** alone performed relatively well (2.53x) because electrophysiological signals, despite their complexity, still exhibit certain predictable frequency distributions that Huffman's method can capitalize on by assigning shorter codes to more frequent patterns.
 
-The two best algorithms were huffmand .....o;iwehdblkj
+### B2Z Algorithm:
 
-### Huffman
+#### Compressing Data with BZ2
 
-### B2Z
+The BZ2 compressor utilizes the Burrows-Wheeler Transform (BWT) followed by the Move-to-Front (MTF) Transform and Huffman coding. Here's how each step contributes to the compression process:
 
-### What was tried & killed
+##### Burrows-Wheeler Transform (BWT):
+
+- **Objective**: Transform the data to make it more compressible.
+- **Process**: Rearranges the data into runs of similar characters. This is particularly effective for data with repetitive sequences such as neural spikes.
+- **Equation**: Given a string \( S \), BWT produces a matrix of all cyclic permutations of \( S \) sorted lexicographically. The last column of this matrix, often more repetitive, is the output.
+
+$$ \text{BWT}(S) = \text{last column of sorted cyclic permutations of } S $$
+
+##### Move-to-Front (MTF) Transform:
+
+- **Objective**: Convert the output of BWT into a form that is more amenable to entropy encoding.
+- **Process**: Records the position of each character, moving the most recently used character to the front of a list. This reduces the entropy by exploiting the locality of reference.
+- **Behavior**: The transform typically results in a sequence where the most frequent characters are represented by smaller integers, which are easier to compress using Huffman coding.
+
+##### Huffman Coding:
+
+- **Objective**: Encode the output from MTF using variable-length codes.
+- **Process**: Assigns shorter codes to more frequently occurring characters.
+- **Efficiency**: Huffman coding is optimal for a known set of probabilities and typically works best when there are clear patterns or frequency biases in the data, which is common in structured neural recordings.
+
+#### Decompressing Data with BZ2
+
+Decompression reverses the compression steps:
+
+- **Huffman Decoding**: Converts the Huffman encoded data back to the MTF encoded sequence.
+- **Inverse Move-to-Front Transform**: Restores the original order post-BWT transformation.
+- **Inverse Burrows-Wheeler Transform**: Recreates the original data from the BWT output.
+
+#### Compression Level Impact
+
+The compression level in BZ2 can be adjusted, typically ranging from 1 to 9. A higher compression level increases the compression ratio but also the computational expense:
+
+- **Compression Level Equation**:
+  - Given a compression level \( L \), the number of iterations or the thoroughness of the search for redundancies increases, which can be represented as:
+
+$$ \text{Compression Time} \propto L \times \text{Data Complexity} $$
+
+- **Higher levels** are best used when compression ratio is prioritized over speed, such as in long-term storage of large datasets where reading frequency is low.
+
+
+### Delta-Huffman Algorithm:
+Delta Huffman Coding combines the principles of delta encoding and Huffman coding to effectively compress data, especially beneficial for time-series or signal data where consecutive samples are often similar.
+
+#### **Building the Huffman Tree**
+
+- **Objective**: Construct a binary tree with optimal prefix codes for efficient data representation based on frequency.
+- **Process**:
+  - **Heap Queue**: Utilizes a min-heap to build the Huffman tree. Symbols are inserted into a priority queue, which is always ordered by frequency.
+  - **Tree Construction**: The two nodes with the lowest frequency are repeatedly removed from the heap, combined into a new node (summing their frequencies), and this new node is reinserted into the heap. This process continues until only one node remains, representing the root of the Huffman tree.
+
+#### **Generating Huffman Codes**
+
+- **Objective**: Assign binary codes to each symbol such that frequently occurring symbols use shorter codes.
+- **Process**:
+  - Starting from the root of the Huffman tree, traverse to each leaf node. Assign '0' for left moves and '1' for right moves, accumulating the path as the code for the symbol at each leaf.
+  - **Canonical Huffman Codes**: Standardize code lengths and order them lexicographically to further optimize the code table, facilitating easier encoding and decoding.
+
+#### **Compressing Data with Canonical Huffman Codes**
+
+- **Objective**: Convert input data into a compact binary representation using the generated Huffman codes.
+- **Process**:
+  - **Encoding**: Each symbol in the input data is replaced by its corresponding Huffman code.
+  - **Padding**: Since the total length of the encoded data may not be a multiple of 8, padding is added to align it to byte boundaries.
+  - **Compression Equation**:
+
+$$ \text{Encoded Data Length} = \sum (\text{Code Length of Symbol} \times \text{Frequency of Symbol}) $$
+
+#### **Decompressing Data**
+
+- **Objective**: Reconstruct the original data from its encoded form.
+- **Process**:
+  - **Binary Conversion**: The encoded byte data is converted back into a binary string.
+  - **Traversal**: Starting from the root of the Huffman tree, traverse according to the binary digits until a leaf node (symbol) is reached, then restart from the root.
+
+#### **Serialization of Huffman Codes**
+
+- **Objective**: Store the Huffman codes in a compact format that can be easily shared or stored.
+- **Process**:
+  - **JSON Serialization**: The Huffman codes are converted into a JSON string, mapping symbols to their respective binary codes, which can be used to reconstruct the Huffman tree during decompression.
+
 
 ## Next Steps
 
-### Future Directions
-[]
+- [ ] **Explore Adaptive Compression Techniques**: Investigate adaptive compression methods that dynamically adjust to the varying characteristics of electrophysiology data to optimize compression ratios and speeds in real-time.
 
-Updates I want to make in the future to improve the design, anyone else is welcome to contribute as well:
+- [ ] **Implement Linear Predictive Coding (LPC)**: Evaluate the use of LPC for lossless compression, leveraging its ability to model and predict signal values based on past samples to enhance compression efficiency.
 
- Add a simple cache for instructions
- Build an adapter to use GPU with Tiny Tapeout 7
- Add basic branch divergence
- Add basic memory coalescing
- Add basic pipelining
- Optimize control flow and use of registers to improve cycle time
- Write a basic graphics kernel or add simple graphics hardware to demonstrate graphics functionality
-For anyone curious to play around or make a contribution, feel free to put up a PR with any improvements you'd like to add 😄
+- [ ] **Expand Algorithm Permutations**: Utilize the modular interface to run evaluations on new permutations of existing algorithms, enabling the discovery of optimized combinations for specific data patterns.
+
+- [ ] **Integrate Machine Learning Models**: Explore integrating machine learning models that can learn and predict data patterns for improved compression, ensuring the process remains lossless.
 
 
+### Open for Pull Requests (PRs) 👋
 
- Lossless compression reduces the size of a file without removing any information, meaning the
-original data will be perfectly intact following decompression. The final size of the compressed file depends
-45 on the randomness or redundancy of the data it contains (a file with more random/unpredictable values will be
-less compressible). Different lossless compressors employ different strategies for eliminating redundancy, but so
-far there has been no systematic comparison of how they interact with continuously sampled electrophysiology
-signals, which display high correlations across both space and time.
+Feel free to contribute to the N1 Codec project! If you have ideas or improvements, just submit a PR. Here are some areas where your contributions could really help:
 
-
-
-
-
-
-
+- **New Compression Algorithms**: Implement and evaluate new lossless compression algorithms tailored for electrophysiology data.
+- **Optimization of Existing Algorithms**: Optimize current algorithms for better performance in terms of speed and compression ratio.
