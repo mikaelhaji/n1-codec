@@ -126,13 +126,39 @@ $$
 > Alternatively, during the Neuralink launch event, DJ Seo introduced a novel on-chip spike detection algorithm that involved directly characterizing the shape of a spike. This method is able to **compress neural data by more than 200x and only takes 900 nanoseconds to compute**, which is faster than the time it takes for the brain to realize it happened. This technique even allows for identifying different neurons from the same electrode based on shape.
 
 
+### Dataset Visualization
+
+**1/ the data is inconsistent & noisy**
+<p align="center">
+  <img src="https://github.com/mikaelhaji/n1-codec/assets/68840767/9cd227a0-a596-4ed6-acb0-7e379db72b84" width="85%" height="auto">
+</p>
+
+The global amplitude statistics for the WAV files are as follows:
+
+- **Mean**: 975.1664476018635
+- **Median**: 992.0
+- **Standard Deviation**: 3154.619387966767
+- **Skewness**: -0.009132604033709467
+- **Kurtosis**: 59.332425608861676
+<br>
+
+The data exhibits substantial variability, highlighted by **a large standard deviation** indicating **wide fluctuations in signal amplitude**, and **a leptokurtic distribution with a high kurtosis value** suggesting data points are densely clustered around the mean with frequent extreme values. Despite a skewness value near zero indicating symmetry, the mode significantly diverges from the mean and median, underscoring the presence of notable outliers. This combination of statistics suggests **a highly variable dataset with a complex, outlier-influenced structure**.
+
+
+**2/ mid-range spectral entropy of the data -- yet also extremely variable across files**
+<br>
+![image](https://github.com/mikaelhaji/n1-codec/assets/68840767/b91f72d7-7c9d-4b0f-95a7-7bd66902bb0f)
+The spectral entropy of the electrophysiology data **averages at 4.88**, indicating a moderately complex and unpredictable spectral distribution. The **standard deviation of 1.16** points to significant variability across files, which complicates achieving consistent compression ratios.
+
+**3/ very noisy, random spectogram**
+![image](https://github.com/mikaelhaji/n1-codec/assets/68840767/d6a640c6-dfc8-4b51-9264-8477287b85e0)
 
 
 
 
 
-### Key Metrics Overview
-Presentation of the key metrics used to evaluate compression performance, such as compression ratio, decompression speed, entropy changes, and any error metrics that were tracked.
+## The Suite of Lossless Algorithms
+
 
 Compression Ratio (CR), computed by dividing the number of bytes in the original data file by the number
 of bytes written to disk after compression. The higher the compression ratio, the lower disk space the com225 pressed data will occupy. For example, a CR of 2 implies that the compressed data occupies half of the disk
@@ -142,8 +168,6 @@ space (50%) compared to uncompressed data, a CR of 4 occupies 25% of the disk sp
 230 a 10 s time range by 10.
 
 
-
-## Algorithms Deployed
 ### Dictionary-Based Codecs
 - **Performance Analysis**: Charts and graphs that compare the compression ratios and speeds of each dictionary-based codec.
 - **Best Use Case Scenarios**: Analysis of the types of data or situations in which these algorithms excel.
