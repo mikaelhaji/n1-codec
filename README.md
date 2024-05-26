@@ -11,14 +11,13 @@ To transmit this data wirelessly in real-time, a _<ins>compression ratio greater
 
 > [!IMPORTANT]
 >
-> **There were 6 groups that these algorithms were categorized in based on their core methodologies and performance characteristics:**
+> **There were 5 groups that these algorithms were categorized in based on their core methodologies and performance characteristics:**
 >
 > 1. _Dictionary-Based Codecs (zstd, lz4, lz4hc, gzip, zlib, bz2 etc.)_
 > 2. _Predictive Codecs (delta etc.)_
 > 3. _Entropy Codecs (huffman, arithmetic etc.)_
-> 4. _Run-Length Encoding Codecs_
-> 5. _Specialized Audio Codecs (wavpack etc.)_
-> 6. _Blosc Hybrid Codecs_
+> 4. _Specialized Audio Codecs (wavpack etc.)_
+> 5. _Blosc Hybrid Codecs_
 >
 > **Despite the common application of these algorithms in various data types, little work has been done to investigate how these compression techniques perform specifically on electrophysiology data.**
 
@@ -147,57 +146,55 @@ The data exhibits substantial variability, highlighted by **a large standard dev
 
 **2/ mid-range spectral entropy of the data -- yet also extremely variable across files**
 <br>
-![image](https://github.com/mikaelhaji/n1-codec/assets/68840767/b91f72d7-7c9d-4b0f-95a7-7bd66902bb0f)
+<p align="center">
+  <img src="https://github.com/mikaelhaji/n1-codec/assets/68840767/b91f72d7-7c9d-4b0f-95a7-7bd66902bb0f" width="85%" height="auto">
+</p>
+<br>
+
 The spectral entropy of the electrophysiology data **averages at 4.88**, indicating a moderately complex and unpredictable spectral distribution. The **standard deviation of 1.16** points to significant variability across files, which complicates achieving consistent compression ratios.
 
 **3/ very noisy, random spectogram**
-![image](https://github.com/mikaelhaji/n1-codec/assets/68840767/d6a640c6-dfc8-4b51-9264-8477287b85e0)
-
-
+<p align="center">
+  <img src="https://github.com/mikaelhaji/n1-codec/assets/68840767/d6a640c6-dfc8-4b51-9264-8477287b85e0" width="85%" height="auto">
+</p>
 
 
 
 ## The Suite of Lossless Algorithms
+### Benchmarking Metrics
+The following variables were measured in order to effectively benchmark the algorithms against one another:
+- **Compression Ratio (CR)**, computed by dividing the number of bytes in the original data file by the number of bytes written to disk after compression. The higher the compression ratio, the lower disk space the compressed data will occupy. For example, a CR of 2 implies that the compressed data occupies half of the disk space (50%) compared to uncompressed data, a CR of 4 occupies 25% of the disk space, and so on.
+- **Compression speed** (in units of xRT, or “times real-time”), computed by dividing the time needed to compress an entire recording divided by the original recording duration.
+- **Decompression speed** (in xRT), computed by dividing the time needed to decompress the data in a 5s time range by 5.
+
+### Results
+
+![Compression_Decompression_Comparison](https://github.com/mikaelhaji/n1-codec/assets/68840767/29ece761-2312-4506-8b9e-cef51597b66d)
 
 
-Compression Ratio (CR), computed by dividing the number of bytes in the original data file by the number
-of bytes written to disk after compression. The higher the compression ratio, the lower disk space the com225 pressed data will occupy. For example, a CR of 2 implies that the compressed data occupies half of the disk
-space (50%) compared to uncompressed data, a CR of 4 occupies 25% of the disk space, and so on.
-• Compression speed (in units of xRT, or “times real-time”), computed by dividing the time needed to compress an entire recording divided by the original recording duration (see duration in Table 1).
-• Decompression speed (in xRT), computed by dividing the time needed to decompress all channels (384) in
-230 a 10 s time range by 10.
+The two best algorithms were huffmand .....o;iwehdblkj
 
+### Huffman
 
-### Dictionary-Based Codecs
-- **Performance Analysis**: Charts and graphs that compare the compression ratios and speeds of each dictionary-based codec.
-- **Best Use Case Scenarios**: Analysis of the types of data or situations in which these algorithms excel.
+### B2Z
 
-### Predictive Coding
-- **Detailed Analysis**: Insights into the predictive mechanisms of these algorithms and how they are leveraged for neural data compression.
-
-### Entropy Coders
-- **Entropy Analysis**: Visuals displaying the entropy of data before and after compression, highlighting the effectiveness of these coders in reducing data redundancy.
-- **In-depth Comparison**: Explanation of the factors leading to the quick invalidation of certain models, providing a deeper understanding of their limitations.
-
-### Run-Length Encoding (RLE)
-- **Use Case Efficiency**: Detailed discussion on the simplicity and efficiency of RLE in specific data scenarios.
-
-### Specialized Audio Codecs
-- **Adaptability to Neural Data**: Exploration of how these codecs, typically used in audio compression, can be adapted for compressing neural data, including potential benefits and drawbacks.
-
-### Blosc Framework
-- **Multicore Efficiency**: Benchmark data showing the performance of Blosc in multicore processing environments, emphasizing its scalability and efficiency.
+### What was tried & killed
 
 ## Next Steps
+
 ### Future Directions
-Outline of potential improvements, further research areas, and next steps for advancing the project, including algorithm optimization and exploration of new compression techniques.
+[]
 
-### Collaboration Opportunities
-An invitation for collaboration, encouraging contributions, feedback, and suggestions from the community and other researchers to help advance the project.
+Updates I want to make in the future to improve the design, anyone else is welcome to contribute as well:
 
-
-
-
+ Add a simple cache for instructions
+ Build an adapter to use GPU with Tiny Tapeout 7
+ Add basic branch divergence
+ Add basic memory coalescing
+ Add basic pipelining
+ Optimize control flow and use of registers to improve cycle time
+ Write a basic graphics kernel or add simple graphics hardware to demonstrate graphics functionality
+For anyone curious to play around or make a contribution, feel free to put up a PR with any improvements you'd like to add 😄
 
 
 
