@@ -38,3 +38,5 @@ clean:
 	rm -f encode decode
 	
 
+install:
+	pip install -r requirements.txt

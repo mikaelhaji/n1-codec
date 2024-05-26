@@ -111,8 +111,8 @@ def main(compressed_file, decompressed_file, tree_file, mode):
     decompress_wav_file(compressed_file, decompressed_file, tree_file, mode)
 
 if __name__ == '__main__':
-    mode = sys.argv[3]
-    # mode = "delta_huff" 
+    # mode = sys.argv[3]
+    mode = "blosc_lz4" 
     compressed_file = sys.argv[1]
     decompressed_file = sys.argv[2]
     tree_file = sys.argv[1] + "_tree.json"
