@@ -26,6 +26,11 @@ decode_cpp: decode.c
 	strip decode
 	chmod +x decode
 
+bzip3: libbzip3.so
+
+libbzip3.so:
+	cd bzip3-master && gcc -fPIC -shared -o ../libbzip3.so *.c -I.
+
 
 eval:
 	sudo bash eval.sh	

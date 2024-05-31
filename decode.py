@@ -112,7 +112,7 @@ def main(compressed_file, decompressed_file, tree_file, mode):
 
 if __name__ == '__main__':
     # mode = sys.argv[3]
-    mode = "blosc_lz4" 
+    mode = "bz2" 
     compressed_file = sys.argv[1]
     decompressed_file = sys.argv[2]
     tree_file = sys.argv[1] + "_tree.json"
